@@ -186,18 +186,22 @@ $categories = $stmt->fetchAll();
                                     </p>
                                 <?php endif; ?>
                                 <div class="mt-2">
+                                    <a href="view_category.php?id=<?php echo $category['category_id']; ?>"
+                                        class="btn btn-sm btn-info me-2">
+                                        <i class="fas fa-eye"></i> View Details
+                                    </a>
                                     <a href="courses.php?category=<?php echo $category['category_id']; ?>"
                                         class="btn btn-sm btn-outline-primary me-2">
-                                        <i class="fas fa-eye"></i> View Courses
+                                        <i class="fas fa-book"></i> Courses
                                     </a>
                                     <a href="edit_category.php?id=<?php echo $category['category_id']; ?>"
                                         class="btn btn-sm btn-outline-secondary me-2">
-                                        <i class="fas fa-edit"></i> Edit
+                                        <i class="fas fa-edit"></i>
                                     </a>
                                     <a href="delete_category.php?id=<?php echo $category['category_id']; ?>"
                                         class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('Are you sure? This will affect all courses in this category.')">
-                                        <i class="fas fa-trash"></i> Delete
+                                        <i class="fas fa-trash"></i>
                                     </a>
                                 </div>
                             </div>

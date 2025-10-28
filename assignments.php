@@ -258,6 +258,10 @@ $courses = $courses_stmt->fetchAll();
                             </div>
 
                             <div class="d-flex gap-2">
+                                <a href="view_assignment.php?id=<?php echo $assignment['assignment_id']; ?>"
+                                    class="btn btn-sm btn-info flex-fill">
+                                    <i class="fas fa-eye"></i> View
+                                </a>
                                 <a href="submissions.php?assignment=<?php echo $assignment['assignment_id']; ?>"
                                     class="btn btn-sm btn-primary flex-fill">
                                     <i class="fas fa-file-alt"></i> Submissions

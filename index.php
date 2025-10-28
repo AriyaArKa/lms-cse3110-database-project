@@ -211,6 +211,57 @@ $category_stats = $stmt->fetchAll();
             font-size: 0.75rem;
             padding: 0.25rem 0.6rem;
         }
+
+        /* SQL Tooltip Styles */
+        .sql-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .sql-tooltip .sql-tooltip-text {
+            visibility: hidden;
+            width: 500px;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            text-align: left;
+            border-radius: 8px;
+            padding: 1rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -250px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .sql-tooltip .sql-tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+        .sql-tooltip:hover .sql-tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .sql-keyword {
+            color: #60a5fa;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -268,78 +319,122 @@ $category_stats = $stmt->fetchAll();
         <!-- Statistics Cards -->
         <div class="row g-4 mb-4">
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card bg-primary text-white">
+                <div class="card stat-card bg-primary text-white sql-tooltip">
                     <div class="card-body text-center">
                         <i class="fas fa-user-graduate stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['total_students']; ?></div>
-                        <div class="stat-label text-white-50">Total Students</div>
+                        <div class="stat-label text-white-50">Total Students <i class="fas fa-info-circle small"></i>
+                        </div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total
+                        <span class="sql-keyword">FROM</span> users
+                        <span class="sql-keyword">WHERE</span> role = 'student'
+                    </span>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card bg-success text-white">
+                <div class="card stat-card bg-success text-white sql-tooltip">
                     <div class="card-body text-center">
                         <i class="fas fa-book-open stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['total_courses']; ?></div>
-                        <div class="stat-label text-white-50">Total Courses</div>
+                        <div class="stat-label text-white-50">Total Courses <i class="fas fa-info-circle small"></i>
+                        </div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total
+                        <span class="sql-keyword">FROM</span> courses
+                    </span>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card bg-info text-white">
+                <div class="card stat-card bg-info text-white sql-tooltip">
                     <div class="card-body text-center">
                         <i class="fas fa-chalkboard-teacher stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['total_instructors']; ?></div>
-                        <div class="stat-label text-white-50">Instructors</div>
+                        <div class="stat-label text-white-50">Instructors <i class="fas fa-info-circle small"></i></div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total
+                        <span class="sql-keyword">FROM</span> users
+                        <span class="sql-keyword">WHERE</span> role = 'instructor'
+                    </span>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card bg-warning text-white">
+                <div class="card stat-card bg-warning text-white sql-tooltip">
                     <div class="card-body text-center">
                         <i class="fas fa-clipboard-list stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['total_enrollments']; ?></div>
-                        <div class="stat-label text-white-50">Enrollments</div>
+                        <div class="stat-label text-white-50">Enrollments <i class="fas fa-info-circle small"></i></div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total
+                        <span class="sql-keyword">FROM</span> enrollments
+                    </span>
                 </div>
             </div>
         </div>
 
         <div class="row g-4 mb-4">
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card bg-danger text-white">
+                <div class="card stat-card bg-danger text-white sql-tooltip">
                     <div class="card-body text-center">
                         <i class="fas fa-tasks stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['total_assignments']; ?></div>
-                        <div class="stat-label text-white-50">Assignments</div>
+                        <div class="stat-label text-white-50">Assignments <i class="fas fa-info-circle small"></i></div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total
+                        <span class="sql-keyword">FROM</span> assignments
+                    </span>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card bg-dark text-white">
+                <div class="card stat-card bg-dark text-white sql-tooltip">
                     <div class="card-body text-center">
                         <i class="fas fa-star stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['avg_rating']; ?></div>
-                        <div class="stat-label text-white-50">Avg Course Rating</div>
+                        <div class="stat-label text-white-50">Avg Course Rating <i class="fas fa-info-circle small"></i>
+                        </div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT AVG</span>(rating) as avg_rating
+                        <span class="sql-keyword">FROM</span> reviews
+                    </span>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div class="card stat-card sql-tooltip"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
                     <div class="card-body text-center text-white">
                         <i class="fas fa-dollar-sign stat-icon"></i>
                         <div class="stat-value">$<?php echo $stats['total_revenue']; ?></div>
-                        <div class="stat-label text-white-50">Total Revenue</div>
+                        <div class="stat-label text-white-50">Total Revenue <i class="fas fa-info-circle small"></i>
+                        </div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT SUM</span>(c.price) as total_revenue
+                        <span class="sql-keyword">FROM</span> enrollments e
+                        <span class="sql-keyword">INNER JOIN</span> courses c
+                        <span class="sql-keyword">ON</span> e.course_id = c.course_id
+                    </span>
                 </div>
             </div>
             <div class="col-md-6 col-lg-3">
-                <div class="card stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="card stat-card sql-tooltip"
+                    style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
                     <div class="card-body text-center text-white">
                         <i class="fas fa-user-shield stat-icon"></i>
                         <div class="stat-value"><?php echo $stats['total_admins']; ?></div>
-                        <div class="stat-label text-white-50">Administrators</div>
+                        <div class="stat-label text-white-50">Administrators <i class="fas fa-info-circle small"></i>
+                        </div>
                     </div>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total
+                        <span class="sql-keyword">FROM</span> users
+                        <span class="sql-keyword">WHERE</span> role = 'admin'
+                    </span>
                 </div>
             </div>
         </div>

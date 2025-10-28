@@ -146,6 +146,57 @@ $stats = $stats_stmt->fetch();
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
             text-align: center;
         }
+
+        /* SQL Tooltip Styles */
+        .sql-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .sql-tooltip .sql-tooltip-text {
+            visibility: hidden;
+            width: 400px;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            text-align: left;
+            border-radius: 8px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -200px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .sql-tooltip .sql-tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+        .sql-tooltip:hover .sql-tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .sql-keyword {
+            color: #60a5fa;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -206,24 +257,36 @@ $stats = $stats_stmt->fetch();
         <!-- Statistics -->
         <div class="row mb-4">
             <div class="col-md-4">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-book fa-2x text-primary mb-2"></i>
                     <h3 class="text-primary mb-0"><?php echo $stats['total_courses']; ?></h3>
-                    <p class="text-muted mb-0">Total Courses</p>
+                    <p class="text-muted mb-0">Total Courses <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*) as total_courses
+                        <span class="sql-keyword">FROM</span> courses
+                    </span>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-dollar-sign fa-2x text-success mb-2"></i>
                     <h3 class="text-success mb-0">$<?php echo number_format($stats['avg_price'], 2); ?></h3>
-                    <p class="text-muted mb-0">Average Price</p>
+                    <p class="text-muted mb-0">Average Price <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT AVG</span>(price) as avg_price
+                        <span class="sql-keyword">FROM</span> courses
+                    </span>
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
                     <h3 class="text-info mb-0">$<?php echo number_format($stats['total_value'], 2); ?></h3>
-                    <p class="text-muted mb-0">Total Value</p>
+                    <p class="text-muted mb-0">Total Value <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT SUM</span>(price) as total_value
+                        <span class="sql-keyword">FROM</span> courses
+                    </span>
                 </div>
             </div>
         </div>

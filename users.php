@@ -124,6 +124,55 @@ $total_users = array_sum($role_counts);
             font-weight: bold;
             margin: 0.5rem 0;
         }
+
+        /* SQL Tooltip Styles */
+        .sql-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .sql-tooltip .sql-tooltip-text {
+            visibility: hidden;
+            width: 350px;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            text-align: left;
+            border-radius: 8px;
+            padding: 0.75rem;
+            position: absolute;
+            z-index: 1000;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -175px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            font-family: 'Courier New', monospace;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            white-space: pre-wrap;
+        }
+
+        .sql-tooltip .sql-tooltip-text::after {
+            content: "";
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            margin-left: -5px;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #1e293b transparent transparent transparent;
+        }
+
+        .sql-tooltip:hover .sql-tooltip-text {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .sql-keyword {
+            color: #60a5fa;
+            font-weight: bold;
+        }
     </style>
 </head>
 
@@ -184,31 +233,50 @@ $total_users = array_sum($role_counts);
         <!-- Statistics -->
         <div class="row">
             <div class="col-md-3">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-users fa-2x text-primary"></i>
                     <h3 class="text-primary"><?php echo $total_users; ?></h3>
-                    <p class="text-muted mb-0">Total Users</p>
+                    <p class="text-muted mb-0">Total Users <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*)
+                        <span class="sql-keyword">FROM</span> users
+                    </span>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-user-graduate fa-2x text-info"></i>
                     <h3 class="text-info"><?php echo $role_counts['student'] ?? 0; ?></h3>
-                    <p class="text-muted mb-0">Students</p>
+                    <p class="text-muted mb-0">Students <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*)
+                        <span class="sql-keyword">FROM</span> users
+                        <span class="sql-keyword">WHERE</span> role = 'student'
+                    </span>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-chalkboard-teacher fa-2x text-success"></i>
                     <h3 class="text-success"><?php echo $role_counts['instructor'] ?? 0; ?></h3>
-                    <p class="text-muted mb-0">Instructors</p>
+                    <p class="text-muted mb-0">Instructors <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*)
+                        <span class="sql-keyword">FROM</span> users
+                        <span class="sql-keyword">WHERE</span> role = 'instructor'
+                    </span>
                 </div>
             </div>
             <div class="col-md-3">
-                <div class="stat-box">
+                <div class="stat-box sql-tooltip">
                     <i class="fas fa-user-shield fa-2x text-danger"></i>
                     <h3 class="text-danger"><?php echo $role_counts['admin'] ?? 0; ?></h3>
-                    <p class="text-muted mb-0">Administrators</p>
+                    <p class="text-muted mb-0">Administrators <i class="fas fa-info-circle small"></i></p>
+                    <span class="sql-tooltip-text">
+                        <span class="sql-keyword">SELECT COUNT</span>(*)
+                        <span class="sql-keyword">FROM</span> users
+                        <span class="sql-keyword">WHERE</span> role = 'admin'
+                    </span>
                 </div>
             </div>
         </div>
@@ -292,6 +360,10 @@ $total_users = array_sum($role_counts);
                                     </td>
                                     <td><?php echo date('M d, Y', strtotime($user['created_at'])); ?></td>
                                     <td>
+                                        <a href="view_user.php?id=<?php echo $user['user_id']; ?>"
+                                            class="btn btn-sm btn-outline-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
                                         <a href="edit_user.php?id=<?php echo $user['user_id']; ?>"
                                             class="btn btn-sm btn-outline-primary" title="Edit">
                                             <i class="fas fa-edit"></i>

@@ -274,6 +274,10 @@ $students = $student_stmt->fetchAll();
                                         </div>
                                     </td>
                                     <td>
+                                        <a href="view_enrollment.php?id=<?php echo $enrollment['enrollment_id']; ?>"
+                                            class="btn btn-sm btn-outline-info" title="View">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
                                         <a href="edit_enrollment.php?id=<?php echo $enrollment['enrollment_id']; ?>"
                                             class="btn btn-sm btn-outline-primary" title="Edit">
                                             <i class="fas fa-edit"></i>
