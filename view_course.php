@@ -306,7 +306,10 @@ $assignments = $stmt->fetchAll();
                     <?php else: ?>
                         <p class="text-muted text-center">No students enrolled yet.</p>
                     <?php endif; ?>
-                    <?php displaySQL($students_sql, "SQL - Enrolled Students", "course_students"); ?>
+                    <?php
+                    $display_students_sql = str_replace(':id', $course_id, $students_sql);
+                    displaySQL($display_students_sql, "SQL - Enrolled Students", "course_students");
+                    ?>
                 </div>
 
                 <!-- Assignments -->
@@ -337,7 +340,10 @@ $assignments = $stmt->fetchAll();
                     <?php else: ?>
                         <p class="text-muted text-center">No assignments created yet.</p>
                     <?php endif; ?>
-                    <?php displaySQL($assignments_sql, "SQL - Course Assignments", "course_assignments"); ?>
+                    <?php
+                    $display_assignments_sql = str_replace(':id', $course_id, $assignments_sql);
+                    displaySQL($display_assignments_sql, "SQL - Course Assignments", "course_assignments");
+                    ?>
                 </div>
 
                 <!-- Reviews -->
@@ -366,7 +372,10 @@ $assignments = $stmt->fetchAll();
                     <?php else: ?>
                         <p class="text-muted text-center">No reviews yet.</p>
                     <?php endif; ?>
-                    <?php displaySQL($reviews_sql, "SQL - Course Reviews", "course_reviews"); ?>
+                    <?php
+                    $display_reviews_sql = str_replace(':id', $course_id, $reviews_sql);
+                    displaySQL($display_reviews_sql, "SQL - Course Reviews", "course_reviews");
+                    ?>
                 </div>
             </div>
 
@@ -395,7 +404,10 @@ $assignments = $stmt->fetchAll();
                     <?php else: ?>
                         <p class="text-muted text-center">No ratings yet</p>
                     <?php endif; ?>
-                    <?php displaySQL($rating_stats_sql, "SQL - Rating Statistics", "rating_stats"); ?>
+                    <?php
+                    $display_rating_stats_sql = str_replace(':id', $course_id, $rating_stats_sql);
+                    displaySQL($display_rating_stats_sql, "SQL - Rating Statistics", "rating_stats");
+                    ?>
                 </div>
 
                 <!-- Course Info -->
@@ -409,13 +421,19 @@ $assignments = $stmt->fetchAll();
                     <p><strong>Price:</strong> <span
                             class="text-success fw-bold">$<?php echo number_format($course['price'], 2); ?></span></p>
                     <p><strong>Created:</strong> <?php echo date('M d, Y', strtotime($course['created_at'])); ?></p>
-                    <?php displaySQL($course_sql, "SQL - Course Details", "course_details"); ?>
+                    <?php
+                    $display_course_sql = str_replace(':id', $course_id, $course_sql);
+                    displaySQL($display_course_sql, "SQL - Course Details", "course_details");
+                    ?>
                 </div>
 
                 <!-- Enrollment Stats -->
                 <div class="info-card">
                     <h5 class="mb-3"><i class="fas fa-chart-pie text-success"></i> Enrollment Stats</h5>
-                    <?php displaySQL($enrollment_stats_sql, "SQL - Enrollment Statistics", "enrollment_stats"); ?>
+                    <?php
+                    $display_enrollment_stats_sql = str_replace(':id', $course_id, $enrollment_stats_sql);
+                    displaySQL($display_enrollment_stats_sql, "SQL - Enrollment Statistics", "enrollment_stats");
+                    ?>
                 </div>
             </div>
         </div>

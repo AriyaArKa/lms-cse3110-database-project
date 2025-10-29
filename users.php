@@ -402,7 +402,25 @@ $total_users = array_sum($role_counts);
             </div>
             <div class="card-body">
                 <?php
-                displaySQL($sql, "Current Query - Users with Filters", "users_main_query");
+                // Build the actual executed query for display
+                $display_sql = "SELECT user_id, name, email, role, created_at FROM users";
+                $where_conditions = [];
+
+                if ($role_filter && $role_filter != 'all') {
+                    $where_conditions[] = "role = '" . htmlspecialchars($role_filter) . "'";
+                }
+
+                if ($search) {
+                    $where_conditions[] = "(name LIKE '%" . htmlspecialchars($search) . "%' OR email LIKE '%" . htmlspecialchars($search) . "%')";
+                }
+
+                if (count($where_conditions) > 0) {
+                    $display_sql .= " WHERE " . implode(" AND ", $where_conditions);
+                }
+
+                $display_sql .= " ORDER BY created_at DESC";
+
+                displaySQL($display_sql, "Current Query - Users with Filters", "users_main_query");
                 ?>
                 <div class="mt-3">
                     <h6>Role Count Query:</h6>
@@ -416,7 +434,7 @@ $total_users = array_sum($role_counts);
     </div>
 
     <footer class="text-center text-muted py-4 mt-5">
-        <p>&copy; 2024 Learning Management System</p>
+        <p>&copy; 2025 Learning Management System</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

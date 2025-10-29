@@ -278,7 +278,10 @@ $reviews = $stmt->fetchAll();
                         </tbody>
                     </table>
                 </div>
-                <?php displaySQL($enrollments_sql, "SQL - Student Enrollments", "user_enrollments"); ?>
+                <?php
+                $display_enrollments_sql = str_replace(':id', $user_id, $enrollments_sql);
+                displaySQL($display_enrollments_sql, "SQL - Student Enrollments", "user_enrollments");
+                ?>
             </div>
         <?php endif; ?>
 
@@ -320,7 +323,10 @@ $reviews = $stmt->fetchAll();
                         </tbody>
                     </table>
                 </div>
-                <?php displaySQL($courses_sql, "SQL - Instructor Courses", "user_courses"); ?>
+                <?php
+                $display_courses_sql = str_replace(':id', $user_id, $courses_sql);
+                displaySQL($display_courses_sql, "SQL - Instructor Courses", "user_courses");
+                ?>
             </div>
         <?php endif; ?>
 
@@ -357,7 +363,10 @@ $reviews = $stmt->fetchAll();
                         </tbody>
                     </table>
                 </div>
-                <?php displaySQL($submissions_sql, "SQL - Student Submissions", "user_submissions"); ?>
+                <?php
+                $display_submissions_sql = str_replace(':id', $user_id, $submissions_sql);
+                displaySQL($display_submissions_sql, "SQL - Student Submissions", "user_submissions");
+                ?>
             </div>
         <?php endif; ?>
 
@@ -381,14 +390,20 @@ $reviews = $stmt->fetchAll();
                         </div>
                     </div>
                 <?php endforeach; ?>
-                <?php displaySQL($reviews_sql, "SQL - User Reviews", "user_reviews"); ?>
+                <?php
+                $display_reviews_sql = str_replace(':id', $user_id, $reviews_sql);
+                displaySQL($display_reviews_sql, "SQL - User Reviews", "user_reviews");
+                ?>
             </div>
         <?php endif; ?>
 
         <!-- User Details SQL -->
         <div class="info-card">
             <h5><i class="fas fa-code text-primary"></i> SQL Queries Used</h5>
-            <?php displaySQL($user_sql, "User Details Query", "user_details"); ?>
+            <?php
+            $display_user_sql = str_replace(':id', $user_id, $user_sql);
+            displaySQL($display_user_sql, "User Details Query", "user_details");
+            ?>
         </div>
     </div>
 

@@ -415,14 +415,66 @@ $stats = $stats_stmt->fetch();
             </div>
             <div class="card-body">
                 <?php
-                displaySQL($query, "Courses Query with JOIN, GROUP BY, and Aggregates", "courses_main_query");
+                // Build the actual executed query for display
+                $display_query = "SELECT 
+            c.course_id,
+            c.title,
+            c.description,
+            c.price,
+            c.created_at,
+            cc.name as category_name,
+            cc.category_id,
+            u.name as instructor_name,
+            u.user_id as instructor_id,
+            COUNT(DISTINCT e.enrollment_id) as enrolled_count,
+            AVG(r.rating) as avg_rating,
+            COUNT(DISTINCT r.review_id) as review_count
+          FROM courses c
+          INNER JOIN course_categories cc ON c.category_id = cc.category_id
+          INNER JOIN users u ON c.instructor_id = u.user_id
+          LEFT JOIN enrollments e ON c.course_id = e.course_id
+          LEFT JOIN reviews r ON c.course_id = r.course_id";
+
+                $where_conditions = [];
+
+                if (!empty($search)) {
+                    $where_conditions[] = "(c.title LIKE '%" . htmlspecialchars($search) . "%' OR c.description LIKE '%" . htmlspecialchars($search) . "%')";
+                }
+
+                if (!empty($category_filter)) {
+                    // Get category name for display
+                    foreach ($categories as $cat) {
+                        if ($cat['category_id'] == $category_filter) {
+                            $where_conditions[] = "c.category_id = " . htmlspecialchars($category_filter) . " /* " . htmlspecialchars($cat['name']) . " */";
+                            break;
+                        }
+                    }
+                }
+
+                if (!empty($instructor_filter)) {
+                    // Get instructor name for display
+                    foreach ($instructors as $inst) {
+                        if ($inst['user_id'] == $instructor_filter) {
+                            $where_conditions[] = "c.instructor_id = " . htmlspecialchars($instructor_filter) . " /* " . htmlspecialchars($inst['name']) . " */";
+                            break;
+                        }
+                    }
+                }
+
+                if (count($where_conditions) > 0) {
+                    $display_query .= "\n          WHERE " . implode(" AND ", $where_conditions);
+                }
+
+                $display_query .= "\n          GROUP BY c.course_id\n          ORDER BY c.created_at DESC";
+
+                displaySQL($display_query, "Courses Query with JOIN, GROUP BY, and Aggregates", "courses_main_query");
                 ?>
             </div>
         </div>
     </div>
 
     <footer class="text-center text-muted py-4 mt-5">
-        <p>&copy; 2024 Learning Management System</p>
+        <p>&copy; 2025 Learning Management System</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
