@@ -180,7 +180,8 @@ $instructors = $stmt->fetchAll();
                 <div class="col-md-8">
                     <h1 class="mb-3"><i class="fas fa-tag"></i> <?php echo htmlspecialchars($category['name']); ?></h1>
                     <p class="lead mb-0">
-                        <?php echo htmlspecialchars($category['description'] ?? 'No description available'); ?></p>
+                        <?php echo htmlspecialchars($category['description'] ?? 'No description available'); ?>
+                    </p>
                 </div>
                 <div class="col-md-4 text-center">
                     <div class="bg-white text-dark p-4 rounded">
@@ -277,7 +278,10 @@ $instructors = $stmt->fetchAll();
                         <p class="text-muted text-center py-5">No courses in this category yet.</p>
                     <?php endif; ?>
 
-                    <?php displaySQL($courses_sql, "SQL - Courses in Category", "category_courses"); ?>
+                    <?php
+                    $display_courses_sql = str_replace(':id', $category_id, $courses_sql);
+                    displaySQL($display_courses_sql, "SQL - Courses in Category", "category_courses");
+                    ?>
                 </div>
             </div>
 
@@ -298,8 +302,14 @@ $instructors = $stmt->fetchAll();
                         <p><strong>Created:</strong> <?php echo date('M d, Y', strtotime($category['created_at'])); ?></p>
                     <?php endif; ?>
 
-                    <?php displaySQL($category_sql, "SQL - Category Details", "category_details"); ?>
-                    <?php displaySQL($stats_sql, "SQL - Category Statistics", "category_stats"); ?>
+                    <?php
+                    $display_category_sql = str_replace(':id', $category_id, $category_sql);
+                    displaySQL($display_category_sql, "SQL - Category Details", "category_details");
+                    ?>
+                    <?php
+                    $display_stats_sql = str_replace(':id', $category_id, $stats_sql);
+                    displaySQL($display_stats_sql, "SQL - Category Statistics", "category_stats");
+                    ?>
                 </div>
 
                 <!-- Top Instructors -->
@@ -336,9 +346,12 @@ $instructors = $stmt->fetchAll();
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <p class="text-muted text-center">No instructors yet</p>
+                        <p class="text-muted text-center">No instructors yet.</p>
                     <?php endif; ?>
-                    <?php displaySQL($instructors_sql, "SQL - Top Instructors", "category_instructors"); ?>
+                    <?php
+                    $display_instructors_sql = str_replace(':id', $category_id, $instructors_sql);
+                    displaySQL($display_instructors_sql, "SQL - Top Instructors", "category_instructors");
+                    ?>
                 </div>
             </div>
         </div>

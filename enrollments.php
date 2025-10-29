@@ -315,7 +315,46 @@ $students = $student_stmt->fetchAll();
             </div>
             <div class="card-body">
                 <?php
-                displaySQL($query, "Enrollments Query with Multiple JOINs", "enrollments_main_query");
+                // Build the actual executed query for display
+                $display_query = "SELECT 
+            e.enrollment_id,
+            e.enrolled_at,
+            e.progress,
+            u.name as student_name,
+            u.user_id as student_id,
+            u.email as student_email,
+            c.course_id,
+            c.title as course_title,
+            c.price,
+            inst.name as instructor_name,
+            cat.name as category_name
+          FROM enrollments e
+          INNER JOIN users u ON e.student_id = u.user_id
+          INNER JOIN courses c ON e.course_id = c.course_id
+          INNER JOIN users inst ON c.instructor_id = inst.user_id
+          INNER JOIN course_categories cat ON c.category_id = cat.category_id";
+
+                $where_conditions = [];
+
+                if (!empty($search)) {
+                    $where_conditions[] = "(u.name LIKE '%" . htmlspecialchars($search) . "%' OR c.title LIKE '%" . htmlspecialchars($search) . "%')";
+                }
+
+                if (!empty($course_filter)) {
+                    $where_conditions[] = "e.course_id = " . htmlspecialchars($course_filter);
+                }
+
+                if (!empty($student_filter)) {
+                    $where_conditions[] = "e.student_id = " . htmlspecialchars($student_filter);
+                }
+
+                if (count($where_conditions) > 0) {
+                    $display_query .= "\n          WHERE " . implode(" AND ", $where_conditions);
+                }
+
+                $display_query .= "\n          ORDER BY e.enrolled_at DESC";
+
+                displaySQL($display_query, "Enrollments Query with Multiple JOINs", "enrollments_main_query");
                 ?>
             </div>
         </div>

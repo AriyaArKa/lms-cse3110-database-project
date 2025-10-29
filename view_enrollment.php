@@ -244,7 +244,10 @@ $review = $stmt->fetch();
                     <?php else: ?>
                         <p class="text-muted text-center py-3">No assignments for this course yet.</p>
                     <?php endif; ?>
-                    <?php displaySQL($assignments_sql, "SQL - Course Assignments & Submissions", "enrollment_assignments"); ?>
+                    <?php
+                    $display_assignments_sql = str_replace([':student_id', ':course_id'], [$enrollment['student_id'], $enrollment['course_id']], $assignments_sql);
+                    displaySQL($display_assignments_sql, "SQL - Course Assignments & Submissions", "enrollment_assignments");
+                    ?>
                 </div>
 
                 <!-- Student Review -->
@@ -265,7 +268,10 @@ $review = $stmt->fetch();
                                     <?php echo date('F d, Y', strtotime($review['created_at'])); ?></small>
                             </div>
                         </div>
-                        <?php displaySQL($review_sql, "SQL - Student's Review", "enrollment_review"); ?>
+                        <?php
+                        $display_review_sql = str_replace([':student_id', ':course_id'], [$enrollment['student_id'], $enrollment['course_id']], $review_sql);
+                        displaySQL($display_review_sql, "SQL - Student's Review", "enrollment_review");
+                        ?>
                     </div>
                 <?php else: ?>
                     <div class="info-card">
@@ -329,7 +335,10 @@ $review = $stmt->fetch();
                 <!-- SQL Query -->
                 <div class="info-card">
                     <h5 class="mb-3"><i class="fas fa-code text-info"></i> Main SQL Query</h5>
-                    <?php displaySQL($enrollment_sql, "Enrollment Details Query", "enrollment_details"); ?>
+                    <?php
+                    $display_enrollment_sql = str_replace(':id', $enrollment_id, $enrollment_sql);
+                    displaySQL($display_enrollment_sql, "Enrollment Details Query", "enrollment_details");
+                    ?>
                 </div>
             </div>
         </div>

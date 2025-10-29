@@ -1,11 +1,35 @@
 -- ============================================================
--- Learning Management System (LMS) - Setup Script
+-- Learning Management System (LMS) - Database Setup Script
 -- ============================================================
--- This script creates all tables and inserts sample data
--- Run this script only once during initial setup
+-- Description: Complete database initialization script for LMS
+-- Version: 1.0
+-- Author: LMS Development Team
+-- Created: 2024
+-- 
+-- Purpose:
+--   This script creates the complete database structure for a 
+--   Learning Management System including:
+--   - 7 core tables (users, courses, enrollments, etc.)
+--   - Sample data (30 users, 20 courses, 50 enrollments)
+--   - 5 views for reporting and analytics
+--   - 4 stored procedures for business logic
+--   - 4 functions for calculations
+--   - 5 triggers for data integrity
+--
+-- Usage:
+--   Run this script once during initial setup or when resetting
+--   the database to its default state.
+--
+-- Warning:
+--   This script will DROP existing tables! All data will be lost.
+--   Make backups before running in production environments.
 -- ============================================================
 USE university_db;
--- Drop tables if they exist (for clean reinstall)
+-- ============================================================
+-- SECTION 1: DROP EXISTING TABLES (Clean Reinstall)
+-- ============================================================
+-- Purpose: Remove all existing tables to ensure a clean installation
+-- Note: Foreign key checks are disabled temporarily to avoid constraint errors
 SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS reviews;
 DROP TABLE IF EXISTS submissions;
@@ -16,7 +40,22 @@ DROP TABLE IF EXISTS course_categories;
 DROP TABLE IF EXISTS users;
 SET FOREIGN_KEY_CHECKS = 1;
 -- ============================================================
+-- SECTION 2: CREATE DATABASE TABLES
+-- ============================================================
+-- ============================================================
 -- Table 1: users
+-- ============================================================
+-- Purpose: Store all system users (students, instructors, admins)
+-- Columns:
+--   - user_id: Primary key, auto-incremented
+--   - name: Full name of the user (max 100 chars)
+--   - email: Unique email address for login (max 100 chars)
+--   - password: Hashed password (bcrypt, 255 chars)
+--   - role: User type - student, instructor, or admin
+--   - created_at: Account creation timestamp
+-- Indexes:
+--   - idx_email: Fast lookup by email for authentication
+--   - idx_role: Fast filtering by user role
 -- ============================================================
 CREATE TABLE users (
     user_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -31,6 +70,14 @@ CREATE TABLE users (
 -- ============================================================
 -- Table 2: course_categories
 -- ============================================================
+-- Purpose: Organize courses into categories for easy browsing
+-- Columns:
+--   - category_id: Primary key, auto-incremented
+--   - name: Category name (unique, max 100 chars)
+-- Indexes:
+--   - idx_name: Fast lookup and sorting by category name
+-- Examples: Web Development, Data Science, Mobile Development
+-- ============================================================
 CREATE TABLE course_categories (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
     name VARCHAR(100) UNIQUE NOT NULL,
@@ -38,6 +85,23 @@ CREATE TABLE course_categories (
 ) ENGINE = InnoDB;
 -- ============================================================
 -- Table 3: courses
+-- ============================================================
+-- Purpose: Store course information and metadata
+-- Columns:
+--   - course_id: Primary key, auto-incremented
+--   - title: Course title (max 200 chars)
+--   - description: Detailed course description (TEXT)
+--   - price: Course price in USD (DECIMAL 10,2)
+--   - category_id: Foreign key to course_categories
+--   - instructor_id: Foreign key to users (role must be instructor)
+--   - created_at: Course creation timestamp
+-- Foreign Keys:
+--   - category_id: RESTRICT delete, CASCADE update
+--   - instructor_id: RESTRICT delete, CASCADE update
+-- Indexes:
+--   - idx_category: Filter courses by category
+--   - idx_instructor: Find all courses by instructor
+--   - idx_title: Search courses by title
 -- ============================================================
 CREATE TABLE courses (
     course_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -56,6 +120,22 @@ CREATE TABLE courses (
 -- ============================================================
 -- Table 4: enrollments
 -- ============================================================
+-- Purpose: Track student enrollments in courses
+-- Columns:
+--   - enrollment_id: Primary key, auto-incremented
+--   - student_id: Foreign key to users (must be student role)
+--   - course_id: Foreign key to courses
+--   - enrolled_at: Enrollment timestamp
+--   - progress: Course completion percentage (0-100)
+-- Foreign Keys:
+--   - student_id: CASCADE delete (remove enrollment if student deleted)
+--   - course_id: CASCADE delete (remove enrollment if course deleted)
+-- Constraints:
+--   - unique_enrollment: Prevent duplicate enrollments (student + course)
+-- Indexes:
+--   - idx_student: Find all enrollments for a student
+--   - idx_course: Find all students enrolled in a course
+-- ============================================================
 CREATE TABLE enrollments (
     enrollment_id INT PRIMARY KEY AUTO_INCREMENT,
     student_id INT NOT NULL,
@@ -71,6 +151,19 @@ CREATE TABLE enrollments (
 -- ============================================================
 -- Table 5: assignments
 -- ============================================================
+-- Purpose: Store course assignments and homework
+-- Columns:
+--   - assignment_id: Primary key, auto-incremented
+--   - course_id: Foreign key to courses
+--   - title: Assignment title (max 200 chars)
+--   - description: Assignment instructions and details (TEXT)
+--   - due_date: Submission deadline (DATETIME)
+-- Foreign Keys:
+--   - course_id: CASCADE delete (remove assignments if course deleted)
+-- Indexes:
+--   - idx_course: Find all assignments for a course
+--   - idx_due_date: Sort and filter by due date
+-- ============================================================
 CREATE TABLE assignments (
     assignment_id INT PRIMARY KEY AUTO_INCREMENT,
     course_id INT NOT NULL,
@@ -83,6 +176,20 @@ CREATE TABLE assignments (
 ) ENGINE = InnoDB;
 -- ============================================================
 -- Table 6: submissions
+-- ============================================================
+-- Purpose: Track student assignment submissions and grades
+-- Columns:
+--   - submission_id: Primary key, auto-incremented
+--   - assignment_id: Foreign key to assignments
+--   - student_id: Foreign key to users
+--   - submitted_at: Submission timestamp
+--   - grade: Assignment grade (0-100, NULL if not graded yet)
+-- Foreign Keys:
+--   - assignment_id: CASCADE delete (remove submissions if assignment deleted)
+--   - student_id: CASCADE delete (remove submissions if student deleted)
+-- Indexes:
+--   - idx_assignment: Find all submissions for an assignment
+--   - idx_student: Find all submissions by a student
 -- ============================================================
 CREATE TABLE submissions (
     submission_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -97,6 +204,24 @@ CREATE TABLE submissions (
 ) ENGINE = InnoDB;
 -- ============================================================
 -- Table 7: reviews
+-- ============================================================
+-- Purpose: Store student course reviews and ratings
+-- Columns:
+--   - review_id: Primary key, auto-incremented
+--   - course_id: Foreign key to courses
+--   - student_id: Foreign key to users
+--   - rating: Star rating (1-5, validated by CHECK constraint)
+--   - comment: Review text (TEXT, optional)
+--   - created_at: Review submission timestamp
+-- Foreign Keys:
+--   - course_id: CASCADE delete (remove reviews if course deleted)
+--   - student_id: CASCADE delete (remove reviews if student deleted)
+-- Constraints:
+--   - CHECK: Rating must be between 1 and 5
+-- Indexes:
+--   - idx_course: Find all reviews for a course
+--   - idx_student: Find all reviews by a student
+--   - idx_rating: Filter and sort by rating
 -- ============================================================
 CREATE TABLE reviews (
     review_id INT PRIMARY KEY AUTO_INCREMENT,
@@ -115,13 +240,28 @@ CREATE TABLE reviews (
     INDEX idx_rating (rating)
 ) ENGINE = InnoDB;
 -- ============================================================
--- SAMPLE DATA INSERTION
+-- SECTION 3: INSERT SAMPLE DATA
+-- ============================================================
+-- Purpose: Populate database with realistic test data
+-- Data includes:
+--   - 2 administrators
+--   - 8 instructors
+--   - 20 students
+--   - 8 course categories
+--   - 20 courses
+--   - 50 enrollments
+--   - 40 assignments
+--   - 60 submissions
+--   - 35 reviews
 -- ============================================================
 -- ============================================================
--- 1. Users Data (30 records - mix of students, instructors, and admins)
+-- 1. Users Data (30 records)
+-- ============================================================
+-- Password: All users have bcrypt hashed password "password"
+-- Breakdown: 2 admins, 8 instructors, 20 students
 -- ============================================================
 INSERT INTO users (name, email, password, role)
-VALUES -- Admins
+VALUES -- Admins (2 records)
     (
         'John Admin',
         'admin@lms.com',
@@ -134,7 +274,7 @@ VALUES -- Admins
         '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
         'admin'
     ),
-    -- Instructors
+    -- Instructors (8 records)
     (
         'Dr. Emily Johnson',
         'emily.johnson@lms.com',
@@ -183,7 +323,7 @@ VALUES -- Admins
         '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
         'instructor'
     ),
-    -- Students
+    -- Students (20 records)
     (
         'Alice Anderson',
         'alice.anderson@student.com',
@@ -307,6 +447,8 @@ VALUES -- Admins
 -- ============================================================
 -- 2. Course Categories Data (8 records)
 -- ============================================================
+-- Categories cover major technology and business domains
+-- ============================================================
 INSERT INTO course_categories (name)
 VALUES ('Web Development'),
     ('Data Science'),
@@ -318,6 +460,9 @@ VALUES ('Web Development'),
     ('Business & Marketing');
 -- ============================================================
 -- 3. Courses Data (20 records)
+-- ============================================================
+-- Realistic courses with prices ranging from $59.99 to $149.99
+-- Each course is assigned to an instructor and category
 -- ============================================================
 INSERT INTO courses (
         title,
@@ -477,8 +622,12 @@ VALUES -- Web Development Courses
 -- ============================================================
 -- 4. Enrollments Data (50 records)
 -- ============================================================
+-- Students enrolled in various courses with progress tracking
+-- Progress ranges from 25% to 95%
+-- Enrollment dates: September 2024
+-- ============================================================
 INSERT INTO enrollments (student_id, course_id, enrolled_at, progress)
-VALUES -- Student 11 (Alice) enrollments
+VALUES -- Student 11 (Alice) enrollments - 3 courses
     (11, 1, '2024-09-01 10:00:00', 75),
     (11, 4, '2024-09-05 14:30:00', 60),
     (11, 10, '2024-09-10 09:15:00', 90),
@@ -550,8 +699,11 @@ VALUES -- Student 11 (Alice) enrollments
 -- ============================================================
 -- 5. Assignments Data (40 records)
 -- ============================================================
+-- Assignments distributed across 13 courses
+-- Due dates range from October to November 2024
+-- ============================================================
 INSERT INTO assignments (course_id, title, description, due_date)
-VALUES -- Course 1 assignments
+VALUES -- Course 1 assignments (3 assignments)
     (
         1,
         'HTML/CSS Project',
@@ -802,12 +954,15 @@ VALUES -- Course 1 assignments
         'Build a text classifier',
         '2024-10-25 23:59:59'
     );
--- Total: 40 assignments
 -- ============================================================
 -- 6. Submissions Data (60 records)
 -- ============================================================
+-- Mix of graded and pending submissions
+-- Grades range from 75.50 to 99.00
+-- NULL grades indicate pending grading
+-- ============================================================
 INSERT INTO submissions (assignment_id, student_id, submitted_at, grade)
-VALUES -- Student 11 submissions
+VALUES -- Student 11 submissions (5 submissions)
     (1, 11, '2024-10-14 18:30:00', 95.00),
     (2, 11, '2024-10-29 20:15:00', 88.50),
     (8, 11, '2024-10-17 16:45:00', 92.00),
@@ -876,6 +1031,9 @@ VALUES -- Student 11 submissions
     (39, 28, '2024-11-16 20:45:00', 85.00);
 -- ============================================================
 -- 7. Reviews Data (35 records)
+-- ============================================================
+-- Student course reviews with ratings (1-5 stars)
+-- Reviews include helpful comments and feedback
 -- ============================================================
 INSERT INTO reviews (
         course_id,
@@ -1123,12 +1281,24 @@ VALUES (
         '2024-11-03 10:30:00'
     );
 -- ============================================================
--- ADVANCED DATABASE FEATURES
+-- SECTION 4: ADVANCED DATABASE FEATURES
+-- ============================================================
+-- This section creates views, stored procedures, functions,
+-- and triggers for advanced database functionality
 -- ============================================================
 -- ============================================================
--- VIEWS - Virtual tables for commonly used queries
+-- SUBSECTION 4.1: VIEWS - Virtual Tables for Reporting
 -- ============================================================
--- View 1: Course Overview with Statistics
+-- Views provide pre-defined queries for common reporting needs
+-- Benefits: Simplified queries, data abstraction, security
+-- ============================================================
+-- ------------------------------------------------------------
+-- View 1: course_overview
+-- ------------------------------------------------------------
+-- Purpose: Comprehensive course statistics dashboard
+-- Returns: Course details with enrollment, rating, and assignment counts
+-- Usage: SELECT * FROM course_overview WHERE category_name = 'Web Development';
+-- ------------------------------------------------------------
 DROP VIEW IF EXISTS course_overview;
 CREATE VIEW course_overview AS
 SELECT c.course_id,
@@ -1147,7 +1317,13 @@ FROM courses c
     LEFT JOIN reviews r ON c.course_id = r.course_id
     LEFT JOIN assignments a ON c.course_id = a.course_id
 GROUP BY c.course_id;
--- View 2: Student Performance Summary
+-- ------------------------------------------------------------
+-- View 2: student_performance
+-- ------------------------------------------------------------
+-- Purpose: Track student progress and performance metrics
+-- Returns: Student info with enrollment count, progress, grades, and reviews
+-- Usage: SELECT * FROM student_performance ORDER BY avg_grade DESC LIMIT 10;
+-- ------------------------------------------------------------
 DROP VIEW IF EXISTS student_performance;
 CREATE VIEW student_performance AS
 SELECT u.user_id AS student_id,
@@ -1164,7 +1340,13 @@ FROM users u
     LEFT JOIN reviews r ON u.user_id = r.student_id
 WHERE u.role = 'student'
 GROUP BY u.user_id;
--- View 3: Instructor Dashboard View
+-- ------------------------------------------------------------
+-- View 3: instructor_dashboard
+-- ------------------------------------------------------------
+-- Purpose: Instructor performance and revenue analytics
+-- Returns: Instructor metrics including courses, students, revenue, ratings
+-- Usage: SELECT * FROM instructor_dashboard WHERE avg_rating >= 4.5;
+-- ------------------------------------------------------------
 DROP VIEW IF EXISTS instructor_dashboard;
 CREATE VIEW instructor_dashboard AS
 SELECT u.user_id AS instructor_id,
@@ -1185,7 +1367,13 @@ FROM users u
     LEFT JOIN reviews r ON c.course_id = r.course_id
 WHERE u.role = 'instructor'
 GROUP BY u.user_id;
--- View 4: Assignment Status View
+-- ------------------------------------------------------------
+-- View 4: assignment_status
+-- ------------------------------------------------------------
+-- Purpose: Monitor assignment submission and grading status
+-- Returns: Assignment details with submission statistics and due date status
+-- Usage: SELECT * FROM assignment_status WHERE status = 'Due Soon';
+-- ------------------------------------------------------------
 DROP VIEW IF EXISTS assignment_status;
 CREATE VIEW assignment_status AS
 SELECT a.assignment_id,
@@ -1209,7 +1397,13 @@ FROM assignments a
     LEFT JOIN submissions s ON a.assignment_id = s.assignment_id
     AND s.student_id = e.student_id
 GROUP BY a.assignment_id;
--- View 5: Category Revenue Analysis
+-- ------------------------------------------------------------
+-- View 5: category_revenue
+-- ------------------------------------------------------------
+-- Purpose: Analyze revenue and performance by course category
+-- Returns: Category statistics including courses, enrollments, revenue, ratings
+-- Usage: SELECT * FROM category_revenue ORDER BY total_revenue DESC;
+-- ------------------------------------------------------------
 DROP VIEW IF EXISTS category_revenue;
 CREATE VIEW category_revenue AS
 SELECT cc.category_id,
@@ -1225,9 +1419,24 @@ FROM course_categories cc
     LEFT JOIN reviews r ON c.course_id = r.course_id
 GROUP BY cc.category_id;
 -- ============================================================
--- STORED PROCEDURES - Reusable business logic
+-- SUBSECTION 4.2: STORED PROCEDURES - Reusable Business Logic
 -- ============================================================
--- Procedure 1: Enroll Student in Course
+-- Procedures encapsulate complex operations and business rules
+-- Benefits: Code reuse, security, performance optimization
+-- ============================================================
+-- ------------------------------------------------------------
+-- Procedure 1: enroll_student
+-- ------------------------------------------------------------
+-- Purpose: Safely enroll a student in a course with validation
+-- Parameters:
+--   - p_student_id: ID of the student to enroll
+--   - p_course_id: ID of the course
+-- Validation:
+--   - Checks student exists and has 'student' role
+--   - Checks course exists
+--   - Prevents duplicate enrollments
+-- Usage: CALL enroll_student(11, 5);
+-- ------------------------------------------------------------
 DROP PROCEDURE IF EXISTS enroll_student;
 DELIMITER // CREATE PROCEDURE enroll_student(
     IN p_student_id INT,
@@ -1262,7 +1471,15 @@ VALUES (p_student_id, p_course_id, NOW(), 0);
 SELECT 'Enrollment successful' AS message;
 END IF;
 END // DELIMITER;
--- Procedure 2: Get Top Performing Students
+-- ------------------------------------------------------------
+-- Procedure 2: get_top_students
+-- ------------------------------------------------------------
+-- Purpose: Retrieve top performing students based on grades
+-- Parameters:
+--   - limit_count: Number of top students to return
+-- Returns: Student details with average grade and submission count
+-- Usage: CALL get_top_students(10);
+-- ------------------------------------------------------------
 DROP PROCEDURE IF EXISTS get_top_students;
 DELIMITER // CREATE PROCEDURE get_top_students(IN limit_count INT) BEGIN
 SELECT u.user_id,
@@ -1282,7 +1499,15 @@ ORDER BY avg_grade DESC,
     total_submissions DESC
 LIMIT limit_count;
 END // DELIMITER;
--- Procedure 3: Course Revenue Report
+-- ------------------------------------------------------------
+-- Procedure 3: course_revenue_report
+-- ------------------------------------------------------------
+-- Purpose: Generate comprehensive revenue report for a course
+-- Parameters:
+--   - p_course_id: ID of the course
+-- Returns: Course details with enrollment count, revenue, and ratings
+-- Usage: CALL course_revenue_report(1);
+-- ------------------------------------------------------------
 DROP PROCEDURE IF EXISTS course_revenue_report;
 DELIMITER // CREATE PROCEDURE course_revenue_report(IN p_course_id INT) BEGIN
 SELECT c.course_id,
@@ -1299,7 +1524,17 @@ FROM courses c
 WHERE c.course_id = p_course_id
 GROUP BY c.course_id;
 END // DELIMITER;
--- Procedure 4: Update Student Progress
+-- ------------------------------------------------------------
+-- Procedure 4: update_progress
+-- ------------------------------------------------------------
+-- Purpose: Update student's course progress with validation
+-- Parameters:
+--   - p_student_id: ID of the student
+--   - p_course_id: ID of the course
+--   - p_progress: New progress value (0-100)
+-- Validation: Ensures progress is between 0 and 100
+-- Usage: CALL update_progress(11, 1, 85);
+-- ------------------------------------------------------------
 DROP PROCEDURE IF EXISTS update_progress;
 DELIMITER // CREATE PROCEDURE update_progress(
     IN p_student_id INT,
@@ -1317,9 +1552,20 @@ SELECT 'Progress updated successfully' AS message;
 END IF;
 END // DELIMITER;
 -- ============================================================
--- FUNCTIONS - Reusable calculations
+-- SUBSECTION 4.3: FUNCTIONS - Reusable Calculations
 -- ============================================================
--- Function 1: Calculate Course Completion Rate
+-- Functions return single values and can be used in SELECT statements
+-- Benefits: Code reuse, cleaner queries, consistent calculations
+-- ============================================================
+-- ------------------------------------------------------------
+-- Function 1: course_completion_rate
+-- ------------------------------------------------------------
+-- Purpose: Calculate average completion rate for a course
+-- Parameters:
+--   - p_course_id: ID of the course
+-- Returns: Average progress percentage (0-100)
+-- Usage: SELECT course_completion_rate(1);
+-- ------------------------------------------------------------
 DROP FUNCTION IF EXISTS course_completion_rate;
 DELIMITER // CREATE FUNCTION course_completion_rate(p_course_id INT) RETURNS DECIMAL(5, 2) DETERMINISTIC BEGIN
 DECLARE completion_rate DECIMAL(5, 2);
@@ -1328,7 +1574,16 @@ FROM enrollments
 WHERE course_id = p_course_id;
 RETURN IFNULL(completion_rate, 0);
 END // DELIMITER;
--- Function 2: Get Student Grade Letter
+-- ------------------------------------------------------------
+-- Function 2: get_grade_letter
+-- ------------------------------------------------------------
+-- Purpose: Convert numeric grade to letter grade
+-- Parameters:
+--   - grade: Numeric grade (0-100)
+-- Returns: Letter grade (A, B, C, D, F, or N/A)
+-- Grading Scale: A(90+), B(80-89), C(70-79), D(60-69), F(<60)
+-- Usage: SELECT get_grade_letter(85.5);
+-- ------------------------------------------------------------
 DROP FUNCTION IF EXISTS get_grade_letter;
 DELIMITER // CREATE FUNCTION get_grade_letter(grade DECIMAL(5, 2)) RETURNS VARCHAR(2) DETERMINISTIC BEGIN
 DECLARE letter VARCHAR(2);
@@ -1346,7 +1601,15 @@ SET letter = 'F';
 END IF;
 RETURN letter;
 END // DELIMITER;
--- Function 3: Count Student Enrollments
+-- ------------------------------------------------------------
+-- Function 3: count_student_enrollments
+-- ------------------------------------------------------------
+-- Purpose: Count total enrollments for a student
+-- Parameters:
+--   - p_student_id: ID of the student
+-- Returns: Number of courses the student is enrolled in
+-- Usage: SELECT count_student_enrollments(11);
+-- ------------------------------------------------------------
 DROP FUNCTION IF EXISTS count_student_enrollments;
 DELIMITER // CREATE FUNCTION count_student_enrollments(p_student_id INT) RETURNS INT DETERMINISTIC BEGIN
 DECLARE enrollment_count INT;
@@ -1355,7 +1618,15 @@ FROM enrollments
 WHERE student_id = p_student_id;
 RETURN enrollment_count;
 END // DELIMITER;
--- Function 4: Calculate Course Revenue
+-- ------------------------------------------------------------
+-- Function 4: calculate_course_revenue
+-- ------------------------------------------------------------
+-- Purpose: Calculate total revenue generated by a course
+-- Parameters:
+--   - p_course_id: ID of the course
+-- Returns: Total revenue (price × enrollment count)
+-- Usage: SELECT calculate_course_revenue(1);
+-- ------------------------------------------------------------
 DROP FUNCTION IF EXISTS calculate_course_revenue;
 DELIMITER // CREATE FUNCTION calculate_course_revenue(p_course_id INT) RETURNS DECIMAL(10, 2) DETERMINISTIC BEGIN
 DECLARE revenue DECIMAL(10, 2);
@@ -1367,9 +1638,19 @@ GROUP BY c.course_id;
 RETURN IFNULL(revenue, 0);
 END // DELIMITER;
 -- ============================================================
--- TRIGGERS - Automated actions
+-- SUBSECTION 4.4: TRIGGERS - Automated Data Integrity
 -- ============================================================
--- Trigger 1: Update course enrollment count after insert
+-- Triggers automatically execute actions in response to events
+-- Benefits: Data validation, audit trails, automatic updates
+-- ============================================================
+-- ------------------------------------------------------------
+-- Trigger 1: after_enrollment_insert
+-- ------------------------------------------------------------
+-- Purpose: Log enrollment activity (placeholder for audit system)
+-- Event: AFTER INSERT on enrollments
+-- Action: Sets session variable with enrollment timestamp
+-- Future: Can be extended to insert into audit_log table
+-- ------------------------------------------------------------
 DROP TRIGGER IF EXISTS after_enrollment_insert;
 DELIMITER // CREATE TRIGGER after_enrollment_insert
 AFTER
@@ -1377,7 +1658,14 @@ INSERT ON enrollments FOR EACH ROW BEGIN -- Log enrollment activity (you can cre
     -- For now, this is a placeholder for future audit logging
 SET @last_enrollment_time = NOW();
 END // DELIMITER;
--- Trigger 2: Prevent deletion of course with enrollments
+-- ------------------------------------------------------------
+-- Trigger 2: before_course_delete
+-- ------------------------------------------------------------
+-- Purpose: Prevent deletion of courses with active enrollments
+-- Event: BEFORE DELETE on courses
+-- Action: Raises error if course has enrollments
+-- Reason: Protects data integrity and prevents accidental data loss
+-- ------------------------------------------------------------
 DROP TRIGGER IF EXISTS before_course_delete;
 DELIMITER // CREATE TRIGGER before_course_delete BEFORE DELETE ON courses FOR EACH ROW BEGIN
 DECLARE enrollment_count INT;
@@ -1388,7 +1676,16 @@ IF enrollment_count > 0 THEN SIGNAL SQLSTATE '45000'
 SET MESSAGE_TEXT = 'Cannot delete course with active enrollments';
 END IF;
 END // DELIMITER;
--- Trigger 3: Validate review rating before insert
+-- ------------------------------------------------------------
+-- Trigger 3: before_review_insert
+-- ------------------------------------------------------------
+-- Purpose: Validate reviews before insertion
+-- Event: BEFORE INSERT on reviews
+-- Validation:
+--   1. Rating must be between 1 and 5
+--   2. Student must be enrolled in the course being reviewed
+-- Reason: Ensures data quality and prevents invalid reviews
+-- ------------------------------------------------------------
 DROP TRIGGER IF EXISTS before_review_insert;
 DELIMITER // CREATE TRIGGER before_review_insert BEFORE
 INSERT ON reviews FOR EACH ROW BEGIN IF NEW.rating < 1
@@ -1405,7 +1702,14 @@ IF NOT EXISTS (
 SET MESSAGE_TEXT = 'Student must be enrolled in course to review';
 END IF;
 END // DELIMITER;
--- Trigger 4: Auto-update progress on submission
+-- ------------------------------------------------------------
+-- Trigger 4: after_submission_insert
+-- ------------------------------------------------------------
+-- Purpose: Automatically update student progress when assignment submitted
+-- Event: AFTER INSERT on submissions
+-- Action: Calculates completion percentage and updates enrollment progress
+-- Formula: (completed_assignments / total_assignments) × 100
+-- ------------------------------------------------------------
 DROP TRIGGER IF EXISTS after_submission_insert;
 DELIMITER // CREATE TRIGGER after_submission_insert
 AFTER
@@ -1440,7 +1744,14 @@ WHERE student_id = NEW.student_id
     AND course_id = p_course_id;
 END IF;
 END // DELIMITER;
--- Trigger 5: Prevent negative prices
+-- ------------------------------------------------------------
+-- Trigger 5: before_course_insert
+-- ------------------------------------------------------------
+-- Purpose: Prevent creation of courses with negative prices
+-- Event: BEFORE INSERT on courses
+-- Validation: Price must be >= 0
+-- Reason: Ensures business rule compliance
+-- ------------------------------------------------------------
 DROP TRIGGER IF EXISTS before_course_insert;
 DELIMITER // CREATE TRIGGER before_course_insert BEFORE
 INSERT ON courses FOR EACH ROW BEGIN IF NEW.price < 0 THEN SIGNAL SQLSTATE '45000'
@@ -1448,24 +1759,25 @@ SET MESSAGE_TEXT = 'Course price cannot be negative';
 END IF;
 END // DELIMITER;
 -- ============================================================
--- LMS Database Setup Complete!
+-- DATABASE SETUP COMPLETE!
 -- ============================================================
--- Total Records Created:
--- - 8 Course Categories
--- - 30 Users (2 admins, 8 instructors, 20 students)
--- - 20 Courses ($59.99 - $149.99 pricing)
--- - 50 Enrollments (with progress tracking 0-100%)
--- - 40 Assignments (across 13 courses with due dates)
--- - 60 Submissions (mix of graded and pending)
--- - 35 Course Reviews (1-5 star ratings)
+-- ============================================================
+-- SUMMARY OF DATABASE CONTENTS
+-- ============================================================
+-- 
+-- TABLES (7):
+--   ├── users (30 records: 2 admins, 8 instructors, 20 students)
+--   ├── course_categories (8 records)
+--   ├── courses (20 records, $59.99-$149.99 pricing)
+--   ├── enrollments (50 records with 0-100% progress)
+--   ├── assignments (40 records across 13 courses)
+--   ├── submissions (60 records, mix of graded and pending)
+--   └── reviews (35 records with 1-5 star ratings)
 --
--- Advanced Features:
--- - 5 Views (course_overview, student_performance, instructor_dashboard, assignment_status, category_revenue)
--- - 4 Stored Procedures (enroll_student, get_top_students, course_revenue_report, update_progress)
--- - 4 Functions (course_completion_rate, get_grade_letter, count_student_enrollments, calculate_course_revenue)
--- - 5 Triggers (enrollment logging, course deletion protection, review validation, auto-progress update, price validation)
--- ============================================================
--- Your LMS is ready to use!
--- Access: http://localhost/lms_db/
--- Default admin: admin@lms.com | password: password
--- ============================================================
+-- VIEWS (5):
+--   ├── course_overview - Course statistics dashboard
+--   ├── student_performance - Student progress tracking
+--   ├── instructor_dashboard - Instructor analytics
+--   ├── assignment_status - Assignment monitoring
+--   └── category_revenue - Category performance analysis
+--

@@ -212,108 +212,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <div class="page-header">
-            <h1><i class="fas fa-book-medical"></i> Add New Course</h1>
-            <p class="mb-0">Enter course information to create a new course offering</p>
-        </div>
 
-        <?php if ($success): ?>
-            <div class="alert alert-success alert-dismissible fade show"><i class="fas fa-check-circle"></i> <?php echo $success; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-        <?php endif; ?>
-        <?php if ($error): ?>
-            <div class="alert alert-danger alert-dismissible fade show"><i class="fas fa-exclamation-circle"></i> <?php echo $error; ?><button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
-        <?php endif; ?>
 
-        <div class="card form-card">
-            <div class="card-header bg-success text-white">
-                <h5 class="mb-0"><i class="fas fa-edit"></i> Course Information Form</h5>
-            </div>
-            <div class="card-body">
-                <form method="POST" action="add_course.php">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Course Code <span class="text-danger">*</span></label>
-                            <input type="text" name="course_code" class="form-control" required placeholder="CS101" value="<?php echo htmlspecialchars($_POST['course_code'] ?? ''); ?>">
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label">Course Name <span class="text-danger">*</span></label>
-                            <input type="text" name="course_name" class="form-control" required value="<?php echo htmlspecialchars($_POST['course_name'] ?? ''); ?>">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" class="form-control" rows="3"><?php echo htmlspecialchars($_POST['description'] ?? ''); ?></textarea>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="form-label">Credits <span class="text-danger">*</span></label>
-                            <input type="number" name="credits" class="form-control" required min="1" max="6" value="<?php echo htmlspecialchars($_POST['credits'] ?? '3'); ?>">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Department <span class="text-danger">*</span></label>
-                            <select name="dept_id" class="form-select" required>
-                                <option value="">Select Department</option>
-                                <?php foreach($departments as $dept): ?>
-                                <option value="<?php echo $dept['dept_id']; ?>" <?php echo (($_POST['dept_id'] ?? '') == $dept['dept_id']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($dept['dept_code'] . ' - ' . $dept['dept_name']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-5">
-                            <label class="form-label">Instructor</label>
-                            <select name="instructor_id" class="form-select">
-                                <option value="">To Be Assigned</option>
-                                <?php foreach($instructors as $instructor): ?>
-                                <option value="<?php echo $instructor['instructor_id']; ?>" <?php echo (($_POST['instructor_id'] ?? '') == $instructor['instructor_id']) ? 'selected' : ''; ?>>
-                                    <?php echo htmlspecialchars($instructor['name']); ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Semester <span class="text-danger">*</span></label>
-                            <select name="semester" class="form-select" required>
-                                <option value="Fall" <?php echo (($_POST['semester'] ?? '') === 'Fall') ? 'selected' : ''; ?>>Fall</option>
-                                <option value="Spring" <?php echo (($_POST['semester'] ?? '') === 'Spring') ? 'selected' : ''; ?>>Spring</option>
-                                <option value="Summer" <?php echo (($_POST['semester'] ?? '') === 'Summer') ? 'selected' : ''; ?>>Summer</option>
-                            </select>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Year <span class="text-danger">*</span></label>
-                            <input type="number" name="year" class="form-control" required min="2020" max="2030" value="<?php echo htmlspecialchars($_POST['year'] ?? date('Y')); ?>">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Max Students</label>
-                            <input type="number" name="max_students" class="form-control" min="1" value="<?php echo htmlspecialchars($_POST['max_students'] ?? '30'); ?>">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Room Number</label>
-                            <input type="text" name="room_number" class="form-control" placeholder="EA-101" value="<?php echo htmlspecialchars($_POST['room_number'] ?? ''); ?>">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Schedule</label>
-                            <input type="text" name="schedule" class="form-control" placeholder="MWF 9:00-10:00" value="<?php echo htmlspecialchars($_POST['schedule'] ?? ''); ?>">
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="active" <?php echo (($_POST['status'] ?? 'active') === 'active') ? 'selected' : ''; ?>>Active</option>
-                                <option value="cancelled" <?php echo (($_POST['status'] ?? '') === 'cancelled') ? 'selected' : ''; ?>>Cancelled</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <hr>
-                            <button type="submit" class="btn btn-success btn-lg"><i class="fas fa-save"></i> Add Course</button>
-                            <a href="courses.php" class="btn btn-secondary btn-lg"><i class="fas fa-times"></i> Cancel</a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
+        
 
     <footer class="text-center text-muted py-4 mt-5">
-        <p>&copy; 2024 University Database Management System</p>
+        <p>&copy; 2025 University Database Management System</p>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

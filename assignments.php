@@ -303,7 +303,39 @@ $courses = $courses_stmt->fetchAll();
             </div>
             <div class="card-body">
                 <?php
-                displaySQL($query, "Assignments Query with JOIN and Aggregates", "assignments_main_query");
+                // Build the actual executed query for display
+                $display_query = "SELECT 
+            a.assignment_id,
+            a.title,
+            a.description,
+            a.due_date,
+            c.title as course_title,
+            c.course_id,
+            u.name as instructor_name,
+            COUNT(DISTINCT s.submission_id) as submission_count,
+            AVG(s.grade) as avg_grade
+          FROM assignments a
+          INNER JOIN courses c ON a.course_id = c.course_id
+          INNER JOIN users u ON c.instructor_id = u.user_id
+          LEFT JOIN submissions s ON a.assignment_id = s.assignment_id";
+
+                $where_conditions = [];
+
+                if (!empty($course_filter)) {
+                    $where_conditions[] = "a.course_id = " . htmlspecialchars($course_filter);
+                }
+
+                if (!empty($search)) {
+                    $where_conditions[] = "(a.title LIKE '%" . htmlspecialchars($search) . "%' OR a.description LIKE '%" . htmlspecialchars($search) . "%')";
+                }
+
+                if (count($where_conditions) > 0) {
+                    $display_query .= "\n          WHERE " . implode(" AND ", $where_conditions);
+                }
+
+                $display_query .= "\n          GROUP BY a.assignment_id\n          ORDER BY a.due_date ASC";
+
+                displaySQL($display_query, "Assignments Query with JOIN and Aggregates", "assignments_main_query");
                 ?>
             </div>
         </div>

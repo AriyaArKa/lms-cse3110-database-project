@@ -258,7 +258,10 @@ $is_overdue = $due_date < $now;
                     <?php else: ?>
                         <p class="text-muted text-center py-4">No submissions yet.</p>
                     <?php endif; ?>
-                    <?php displaySQL($submissions_sql, "SQL - All Submissions", "assignment_submissions"); ?>
+                    <?php
+                    $display_submissions_sql = str_replace(':id', $assignment_id, $submissions_sql);
+                    displaySQL($display_submissions_sql, "SQL - All Submissions", "assignment_submissions");
+                    ?>
                 </div>
             </div>
 
@@ -321,7 +324,10 @@ $is_overdue = $due_date < $now;
                     <?php else: ?>
                         <p class="text-muted text-center">No submissions to display</p>
                     <?php endif; ?>
-                    <?php displaySQL($submission_stats_sql, "SQL - Submission Statistics", "submission_stats"); ?>
+                    <?php
+                    $display_submission_stats_sql = str_replace(':id', $assignment_id, $submission_stats_sql);
+                    displaySQL($display_submission_stats_sql, "SQL - Submission Statistics", "submission_stats");
+                    ?>
                 </div>
 
                 <!-- Assignment Details -->
@@ -340,7 +346,10 @@ $is_overdue = $due_date < $now;
                     <?php if (isset($assignment['created_at']) && $assignment['created_at']): ?>
                         <p><strong>Created:</strong> <?php echo date('M d, Y', strtotime($assignment['created_at'])); ?></p>
                     <?php endif; ?>
-                    <?php displaySQL($assignment_sql, "SQL - Assignment Details", "assignment_details"); ?>
+                    <?php
+                    $display_assignment_sql = str_replace(':id', $assignment_id, $assignment_sql);
+                    displaySQL($display_assignment_sql, "SQL - Assignment Details", "assignment_details");
+                    ?>
                 </div>
             </div>
         </div>

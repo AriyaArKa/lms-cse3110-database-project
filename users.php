@@ -10,20 +10,25 @@ $role_filter = isset($_GET['role']) ? $_GET['role'] : '';
 $search = isset($_GET['search']) ? $_GET['search'] : '';
 
 // Build query
-$sql = "SELECT user_id, name, email, role, created_at FROM users WHERE 1=1";
+$sql = "SELECT user_id, name, email, role, created_at FROM users";
 $params = [];
+$where_conditions = [];
 
 if ($role_filter && $role_filter != 'all') {
-    $sql .= " AND role = :role";
+    $where_conditions[] = "role = :role";
     $params[':role'] = $role_filter;
 }
 
 if ($search) {
-    $sql .= " AND (name LIKE :search OR email LIKE :search)";
+    $where_conditions[] = "(name LIKE :search OR email LIKE :search)";
     $params[':search'] = "%$search%";
 }
 
-$sql .= " ORDER BY created_at DESC";
+if (count($where_conditions) > 0) {
+    $sql .= " WHERE " . implode(" AND ", $where_conditions);
+}
+
+$sql .= " ORDER BY created_at DESC, user_id DESC";
 
 $stmt = $conn->prepare($sql);
 $stmt->execute($params);
@@ -418,7 +423,7 @@ $total_users = array_sum($role_counts);
                     $display_sql .= " WHERE " . implode(" AND ", $where_conditions);
                 }
 
-                $display_sql .= " ORDER BY created_at DESC";
+                $display_sql .= " ORDER BY created_at DESC, user_id DESC";
 
                 displaySQL($display_sql, "Current Query - Users with Filters", "users_main_query");
                 ?>
