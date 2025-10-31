@@ -1758,26 +1758,3 @@ INSERT ON courses FOR EACH ROW BEGIN IF NEW.price < 0 THEN SIGNAL SQLSTATE '4500
 SET MESSAGE_TEXT = 'Course price cannot be negative';
 END IF;
 END // DELIMITER;
--- ============================================================
--- DATABASE SETUP COMPLETE!
--- ============================================================
--- ============================================================
--- SUMMARY OF DATABASE CONTENTS
--- ============================================================
--- 
--- TABLES (7):
---   ├── users (30 records: 2 admins, 8 instructors, 20 students)
---   ├── course_categories (8 records)
---   ├── courses (20 records, $59.99-$149.99 pricing)
---   ├── enrollments (50 records with 0-100% progress)
---   ├── assignments (40 records across 13 courses)
---   ├── submissions (60 records, mix of graded and pending)
---   └── reviews (35 records with 1-5 star ratings)
---
--- VIEWS (5):
---   ├── course_overview - Course statistics dashboard
---   ├── student_performance - Student progress tracking
---   ├── instructor_dashboard - Instructor analytics
---   ├── assignment_status - Assignment monitoring
---   └── category_revenue - Category performance analysis
---
